@@ -1,0 +1,6 @@
+PySide6==6.7.*
+pynput==1.7.*
+pywin32==306; sys_platform == "win32"
+psutil==6.*
+watchdog==4.*
+pytest==8.*
