@@ -20,7 +20,7 @@ def _seq_to_signal(seq: QKeySequence) -> str:
 
 _CONTROL_IDS = [f"k{i}" for i in range(1, 13)] + [
     "knob1.ccw", "knob1.cw", "knob1.press", "knob2.ccw", "knob2.cw", "knob2.press"]
-_ACTION_TYPES = ["send_keys", "open", "launch", "run", "text"]
+_ACTION_TYPES = ["send_keys", "open", "run", "text"]
 
 
 class EditorWindow(QWidget):
@@ -128,7 +128,7 @@ class EditorWindow(QWidget):
             t = atype.currentText()
             action = Action(type=t,
                             keys=val if t == "send_keys" else None,
-                            target=val if t in ("open", "launch", "run") else None,
+                            target=val if t in ("open", "run") else None,
                             text=val if t == "text" else None)
             keys[cid] = KeyBinding(label=lbl or cid, action=action)
         p.keys = keys

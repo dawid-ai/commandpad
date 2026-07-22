@@ -5,9 +5,9 @@ from typing import Optional
 
 @dataclass
 class Action:
-    type: str                       # send_keys | open | launch | run | text
+    type: str                       # send_keys | open | run | text
     keys: Optional[str] = None      # send_keys
-    target: Optional[str] = None    # open | launch | run
+    target: Optional[str] = None    # open | run
     text: Optional[str] = None      # text
 
 

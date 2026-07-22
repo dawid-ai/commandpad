@@ -9,7 +9,6 @@ class FakeEffects:
         self.calls = []
     def send_keys(self, keys): self.calls.append(("send_keys", keys))
     def open_target(self, target): self.calls.append(("open", target))
-    def launch(self, target): self.calls.append(("launch", target))
     def run_command(self, target): self.calls.append(("run", target))
     def type_text(self, text): self.calls.append(("text", text))
 
@@ -32,11 +31,10 @@ def test_text_expands_tokens():
     assert fx.calls == [("text", "/note ")]
 
 
-def test_run_and_launch_route():
+def test_run_routes():
     fx = FakeEffects()
-    run_action(Action("launch", target="Obsidian"), fx)
     run_action(Action("run", target="git pull"), fx)
-    assert fx.calls == [("launch", "Obsidian"), ("run", "git pull")]
+    assert fx.calls == [("run", "git pull")]
 
 
 def test_unknown_type_raises():

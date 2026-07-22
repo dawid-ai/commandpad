@@ -143,8 +143,7 @@ Runtime data, hot-reloaded. Three parts: `settings`, a one-time `controls` map, 
 | type | does | example `action` |
 |------|------|------------------|
 | `send_keys` | Fire a shortcut at the focused app | `{ "type": "send_keys", "keys": "ctrl+shift+f" }` |
-| `open` | Open a file / URL / URI (supports `{today}` etc. tokens) | `{ "type": "open", "target": "https://…" }` |
-| `launch` | Start or focus an app | `{ "type": "launch", "target": "Obsidian" }` |
+| `open` | Open a file / URL / URI, or launch an app by path (supports `{today}` etc. tokens) | `{ "type": "open", "target": "https://…" }` |
 | `run` | Run a shell command | `{ "type": "run", "target": "git -C … pull" }` |
 | `text` | Type literal text (then user keeps typing) | `{ "type": "text", "text": "/note " }` |
 

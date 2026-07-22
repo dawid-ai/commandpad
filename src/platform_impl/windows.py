@@ -119,9 +119,6 @@ class WindowsEffects:
         else:
             os.startfile(target)
 
-    def launch(self, target: str) -> None:
-        os.startfile(target)
-
     def run_command(self, target: str) -> None:
         subprocess.Popen(target, shell=True)
 

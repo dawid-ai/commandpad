@@ -4,7 +4,7 @@ import re
 from src.models import Action, KeyBinding, Match, Profile, Settings, Config
 
 VALID_HUD_MODES = {"flash", "pinned", "off"}
-VALID_ACTION_TYPES = {"send_keys", "open", "launch", "run", "text"}
+VALID_ACTION_TYPES = {"send_keys", "open", "run", "text"}
 
 
 class ConfigError(Exception):

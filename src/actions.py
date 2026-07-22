@@ -9,7 +9,6 @@ from src.tokens import expand_tokens
 class Effects(Protocol):
     def send_keys(self, keys: str) -> None: ...
     def open_target(self, target: str) -> None: ...
-    def launch(self, target: str) -> None: ...
     def run_command(self, target: str) -> None: ...
     def type_text(self, text: str) -> None: ...
 
@@ -19,8 +18,6 @@ def run_action(action: Action, effects: Effects, today: Optional[date] = None) -
         effects.send_keys(action.keys or "")
     elif action.type == "open":
         effects.open_target(expand_tokens(action.target or "", today))
-    elif action.type == "launch":
-        effects.launch(action.target or "")
     elif action.type == "run":
         effects.run_command(expand_tokens(action.target or "", today))
     elif action.type == "text":
