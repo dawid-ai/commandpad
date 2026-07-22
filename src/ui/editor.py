@@ -1,11 +1,22 @@
 # src/ui/editor.py
 from PySide6.QtWidgets import (
     QWidget, QListWidget, QHBoxLayout, QVBoxLayout, QFormLayout, QLineEdit,
-    QComboBox, QPushButton, QLabel, QScrollArea, QGridLayout
+    QComboBox, QPushButton, QLabel, QScrollArea, QGridLayout, QDialog,
+    QKeySequenceEdit
 )
+from PySide6.QtGui import QKeySequence
 from src.config import load_config, save_config
 from src.models import Action, KeyBinding, Match, Profile
 from src.platform_impl.windows import WindowsAppDetector
+
+
+def _seq_to_signal(seq: QKeySequence) -> str:
+    """Convert a captured QKeySequence to commandpad's 'ctrl+shift+f' format."""
+    text = seq.toString(QKeySequence.PortableText)
+    if not text:
+        return ""
+    first = text.split(", ")[0]                     # take the first chord only
+    return first.strip().lower().replace("meta", "win")
 
 _CONTROL_IDS = [f"k{i}" for i in range(1, 13)] + [
     "knob1.ccw", "knob1.cw", "knob1.press", "knob2.ccw", "knob2.cw", "knob2.press"]
@@ -54,14 +65,25 @@ class EditorWindow(QWidget):
         grid_host = QWidget()
         self._grid = QGridLayout(grid_host)
         self._rows = {}
-        for i, cid in enumerate(_CONTROL_IDS):
+        # header row
+        for col, head in enumerate(["Control", "Label (shown on HUD)", "Type", "Keys / target / text", ""]):
+            h = QLabel(head)
+            h.setStyleSheet("color:#888;font-weight:600;")
+            self._grid.addWidget(h, 0, col)
+        for i, cid in enumerate(_CONTROL_IDS, start=1):
             self._grid.addWidget(QLabel(cid), i, 0)
             label = QLineEdit()
             atype = QComboBox(); atype.addItems(_ACTION_TYPES)
             payload = QLineEdit()   # keys/target/text combined field
+            payload.setPlaceholderText("ctrl+c  ·  https://…  ·  a path  ·  text")
+            cap = QPushButton("⌨")
+            cap.setFixedWidth(32)
+            cap.setToolTip("Press a shortcut to capture it (for send_keys)")
+            cap.clicked.connect(lambda _=False, p=payload: self._capture_keys(p))
             self._grid.addWidget(label, i, 1)
             self._grid.addWidget(atype, i, 2)
             self._grid.addWidget(payload, i, 3)
+            self._grid.addWidget(cap, i, 4)
             self._rows[cid] = (label, atype, payload)
         scroll.setWidget(grid_host)
         right.addWidget(scroll, 1)
@@ -111,6 +133,31 @@ class EditorWindow(QWidget):
             keys[cid] = KeyBinding(label=lbl or cid, action=action)
         p.keys = keys
         self._list.item(idx).setText(p.name)
+
+    def _capture_keys(self, payload_field: QLineEdit):
+        dlg = QDialog(self)
+        dlg.setWindowTitle("Capture shortcut")
+        v = QVBoxLayout(dlg)
+        v.addWidget(QLabel("Press the key combination, then OK:"))
+        kse = QKeySequenceEdit()
+        try:
+            kse.setMaximumSequenceLength(1)     # single chord (Qt 6.5+)
+        except AttributeError:
+            pass
+        v.addWidget(kse)
+        buttons = QHBoxLayout()
+        ok = QPushButton("OK")
+        cancel = QPushButton("Cancel")
+        ok.clicked.connect(dlg.accept)
+        cancel.clicked.connect(dlg.reject)
+        buttons.addWidget(ok)
+        buttons.addWidget(cancel)
+        v.addLayout(buttons)
+        kse.setFocus()
+        if dlg.exec():
+            sig = _seq_to_signal(kse.keySequence())
+            if sig:
+                payload_field.setText(sig)
 
     def _grab_app(self):
         proc, _ = self._detector.current()
