@@ -37,8 +37,9 @@ matches the earlier AutoHotkey setup:
 - 2 knobs × 3 actions (ccw / cw / press) → `Ctrl+F13`..`Ctrl+F18`
 
 Nothing else on the system uses `F13`–`F24` or `Ctrl+F13`–`Ctrl+F18`, so they stay
-collision-proof. The HUD is toggled by **knob-1 click** (`Ctrl+F15`), mirroring the AHK
-overlay — see §6.
+collision-proof. All 18 pad controls (12 keys + 2 knobs × ccw/cw/press) are mappable
+actions. The HUD toggle is a **main-keyboard** combo (`Ctrl+Alt+Shift+H` by default), so it
+doesn't consume a pad control — see §6.
 
 Nothing else on the system uses these, so the app **only listens** — it does not intercept
 or suppress keystrokes. This removes the hardest, flakiest part of a Windows key hook.
@@ -151,9 +152,9 @@ Tokens (v1): `{today}` (yyyy-mm-dd). More can be added later.
 
 ## 6. HUD behavior
 
-- **Toggle** via `hud_toggle_hotkey` (default `Ctrl+F15` = knob-1 click, mirroring the AHK
-  overlay). Any collision-proof signal the pad emits works; the toggle signal is consumed
-  before dispatch, so it isn't also a per-app action.
+- **Toggle** via `hud_toggle_hotkey` (default `Ctrl+Alt+Shift+H`, a main-keyboard combo so
+  it leaves all pad controls free). Editable in the editor's Global settings. If set to a
+  pad signal, that signal is consumed before dispatch and isn't also a per-app action.
 - **Modes:** `flash` (appears on app-switch, fades after `hud_flash_seconds`), `pinned`
   (stays until toggled off), `off` (only shows on the hotkey).
 - **Look:** translucent rounded panel laid out as the 4×3 grid + 2 knobs; each cell shows

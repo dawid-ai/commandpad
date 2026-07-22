@@ -49,6 +49,23 @@ class EditorWindow(QWidget):
         root.addLayout(left, 1)
 
         right = QVBoxLayout()
+
+        # --- global settings (not per-profile) ---
+        gs = QFormLayout()
+        self._hud_toggle = QLineEdit(self._config.settings.hud_toggle_hotkey)
+        gs_cap = QPushButton("⌨"); gs_cap.setFixedWidth(32)
+        gs_cap.setToolTip("Press the shortcut that should toggle the HUD")
+        gs_cap.clicked.connect(lambda _=False: self._capture_keys(self._hud_toggle))
+        toggle_row = QHBoxLayout()
+        toggle_row.addWidget(self._hud_toggle)
+        toggle_row.addWidget(gs_cap)
+        self._hud_mode = QComboBox(); self._hud_mode.addItems(["flash", "pinned", "off"])
+        self._hud_mode.setCurrentText(self._config.settings.hud_mode)
+        gs.addRow("HUD toggle", toggle_row)
+        gs.addRow("HUD mode", self._hud_mode)
+        right.addWidget(QLabel("Global settings"))
+        right.addLayout(gs)
+
         form = QFormLayout()
         self._name = QLineEdit()
         self._color = QLineEdit()
@@ -59,6 +76,7 @@ class EditorWindow(QWidget):
         form.addRow("Color", self._color)
         form.addRow("Process(es)", self._process)
         form.addRow("", grab)
+        right.addWidget(QLabel("Profile"))
         right.addLayout(form)
 
         scroll = QScrollArea()
@@ -182,5 +200,8 @@ class EditorWindow(QWidget):
 
     def _save(self):
         self._capture_profile(self._current_idx)
+        self._config.settings.hud_toggle_hotkey = (
+            self._hud_toggle.text().strip() or self._config.settings.hud_toggle_hotkey)
+        self._config.settings.hud_mode = self._hud_mode.currentText()
         save_config(self._config, self._path)
         self._on_saved()
