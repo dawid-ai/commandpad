@@ -41,4 +41,7 @@ class Engine:
         action = resolve_action(profile, control_id)
         if action is None:
             return
-        run_action(action, self.effects)
+        try:
+            run_action(action, self.effects)
+        except Exception as e:
+            print(f"[action error] {e}")

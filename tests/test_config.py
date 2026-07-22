@@ -51,6 +51,13 @@ def test_bad_hud_mode_raises():
         parse_config(data)
 
 
+def test_invalid_title_regex_raises():
+    data = _valid_data()
+    data["profiles"][0]["match"]["title"] = "([unclosed"
+    with pytest.raises(ConfigError):
+        parse_config(data)
+
+
 def test_load_config_from_file(tmp_path):
     p = tmp_path / "profiles.json"
     p.write_text(json.dumps(_valid_data()), encoding="utf-8")

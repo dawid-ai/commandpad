@@ -103,8 +103,11 @@ class WindowsEffects:
         pressed = [mod_keys[m] for m in mods if m in mod_keys]
         for m in pressed:
             self._kb.press(m)
-        self._kb.press(target)
-        self._kb.release(target)
+        try:
+            self._kb.press(target)
+            self._kb.release(target)
+        except Exception as e:
+            print(f"[send_keys warning] unknown key {target!r}: {e}")
         for m in reversed(pressed):
             self._kb.release(m)
 

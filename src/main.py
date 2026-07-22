@@ -4,7 +4,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from PySide6.QtWidgets import QApplication
-from PySide6.QtCore import QTimer
+from PySide6.QtCore import QTimer, QObject, Signal
 
 from src.config import load_config, ConfigWatcher, ConfigError
 from src.engine import Engine
@@ -12,7 +12,19 @@ from src.platform_impl.windows import WindowsKeyListener, WindowsAppDetector, Wi
 from src.ui.hud import HudOverlay
 from src.ui.tray import TrayIcon
 
-CONFIG_PATH = "profiles.json" if os.path.exists("profiles.json") else "profiles.example.json"
+_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+CONFIG_PATH = (
+    os.path.join(_ROOT, "profiles.json")
+    if os.path.exists(os.path.join(_ROOT, "profiles.json"))
+    else os.path.join(_ROOT, "profiles.example.json")
+)
+
+
+class _Reloader(QObject):
+    """Marshals config-watcher callbacks (fired on a watchdog thread) onto
+    the GUI thread. The default (auto) connection type queues the signal
+    across threads, so `reload_config` always runs on the Qt event loop."""
+    triggered = Signal()
 
 
 def main():
@@ -26,18 +38,18 @@ def main():
 
     def on_profile_change(profile):
         tray.set_profile(profile.name)
-        if config.settings.hud_mode == "flash":
-            hud.show_profile(profile, config.controls)
-            hud.flash(config.settings.hud_flash_seconds)
-        elif config.settings.hud_mode == "pinned" and hud.isVisible():
-            hud.show_profile(profile, config.controls)
+        if engine.config.settings.hud_mode == "flash":
+            hud.show_profile(profile, engine.config.controls)
+            hud.flash(engine.config.settings.hud_flash_seconds)
+        elif engine.config.settings.hud_mode == "pinned" and hud.isVisible():
+            hud.show_profile(profile, engine.config.controls)
 
     engine = Engine(config, detector, effects, on_profile_change=on_profile_change)
 
     def toggle_hud():
         p = engine.current_profile()
         if p:
-            hud.show_profile(p, config.settings and engine.config.controls)
+            hud.show_profile(p, engine.config.controls)
         hud.toggle_pinned()
 
     from src.ui.editor import EditorWindow
@@ -63,7 +75,7 @@ def main():
     poll.timeout.connect(engine.refresh_profile)
     poll.start(250)
 
-    # Hot-reload config on file change (marshal to the Qt thread via a timer).
+    # Hot-reload config on file change (marshal to the Qt thread via a queued signal).
     def reload_config():
         try:
             engine.update_config(load_config(CONFIG_PATH))
@@ -71,7 +83,9 @@ def main():
         except ConfigError as e:
             print(f"[config] invalid, keeping previous: {e}")
 
-    watcher = ConfigWatcher(CONFIG_PATH, lambda: QTimer.singleShot(0, reload_config))
+    reloader = _Reloader()
+    reloader.triggered.connect(reload_config)
+    watcher = ConfigWatcher(CONFIG_PATH, reloader.triggered.emit)
     watcher.start()
 
     try:

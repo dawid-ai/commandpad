@@ -1,5 +1,6 @@
 # src/config.py
 import json
+import re
 from src.models import Action, KeyBinding, Match, Profile, Settings, Config
 
 VALID_HUD_MODES = {"flash", "pinned", "off"}
@@ -32,6 +33,12 @@ def _parse_profile(data: dict) -> Profile:
     match = data["match"]
     if not isinstance(match, dict):
         raise ConfigError(f"profile.match must be an object: {match!r}")
+    title = match.get("title")
+    if title:
+        try:
+            re.compile(title)
+        except re.error as e:
+            raise ConfigError(f"invalid title regex: {title!r}: {e}")
     keys = {cid: _parse_binding(b) for cid, b in data.get("keys", {}).items()}
     return Profile(
         name=data["name"],
@@ -79,15 +86,24 @@ def load_config(path: str) -> Config:
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 import os as _os
+import time as _time
+
+_DEBOUNCE_SECONDS = 0.3
 
 
 class _Handler(FileSystemEventHandler):
     def __init__(self, path, on_change):
         self._path = _os.path.abspath(path)
         self._on_change = on_change
+        self._last_fired = 0.0
     def on_modified(self, event):
-        if _os.path.abspath(event.src_path) == self._path:
-            self._on_change()
+        if _os.path.abspath(event.src_path) != self._path:
+            return
+        now = _time.monotonic()
+        if now - self._last_fired < _DEBOUNCE_SECONDS:
+            return
+        self._last_fired = now
+        self._on_change()
 
 
 class ConfigWatcher:

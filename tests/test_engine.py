@@ -61,3 +61,31 @@ def test_profile_change_callback_fires_on_switch():
     eng.detector.proc = "notepad.exe"
     eng.refresh_profile()
     assert seen == ["Obsidian", "Default"]
+
+
+class RaisingEffects(FakeEffects):
+    def send_keys(self, keys):
+        raise RuntimeError("boom")
+
+
+def _config_with_two_controls():
+    return parse_config({
+        "controls": {"k1": "f13", "k2": "f14"},
+        "profiles": [
+            {"name": "Obsidian", "color": "#8b5cf6", "match": {"process": ["Obsidian.exe"]},
+             "keys": {
+                 "k1": {"label": "Search", "action": {"type": "send_keys", "keys": "ctrl+shift+f"}},
+                 "k2": {"label": "Open", "action": {"type": "open", "target": "http://example.com"}},
+             }},
+        ],
+    })
+
+
+def test_throwing_action_does_not_propagate():
+    fx = RaisingEffects()
+    eng = Engine(_config_with_two_controls(), FakeDetector("Obsidian.exe"), fx)
+    eng.handle_signal("f13")          # maps to send_keys, which raises internally -- must not propagate
+    assert fx.calls == []             # RaisingEffects raises before recording the call
+    # the listener/engine must still work for other signals after a failure
+    eng.handle_signal("f14")
+    assert fx.calls == [("open", "http://example.com")]
