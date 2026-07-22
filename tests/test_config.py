@@ -56,3 +56,15 @@ def test_load_config_from_file(tmp_path):
     p.write_text(json.dumps(_valid_data()), encoding="utf-8")
     c = load_config(str(p))
     assert c.profiles[1].name == "Default"
+
+
+from src.config import save_config
+
+
+def test_save_then_load_round_trips(tmp_path):
+    c = parse_config(_valid_data())
+    path = str(tmp_path / "out.json")
+    save_config(c, path)
+    again = load_config(path)
+    assert again.profiles[0].keys["k1"].action.target == "x"
+    assert again.settings.hud_mode == "pinned"

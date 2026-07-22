@@ -40,7 +40,13 @@ def main():
             hud.show_profile(p, config.settings and engine.config.controls)
         hud.toggle_pinned()
 
-    tray = TrayIcon(on_toggle_hud=toggle_hud, on_open_editor=lambda: None, on_quit=app.quit)
+    from src.ui.editor import EditorWindow
+    editor_holder = {}
+    def open_editor():
+        w = EditorWindow(CONFIG_PATH, on_saved=reload_config)
+        editor_holder["win"] = w   # keep a reference so it isn't GC'd
+        w.show()
+    tray = TrayIcon(on_toggle_hud=toggle_hud, on_open_editor=open_editor, on_quit=app.quit)
 
     # Route pad signals; intercept the HUD toggle hotkey first.
     def on_signal(signal: str):

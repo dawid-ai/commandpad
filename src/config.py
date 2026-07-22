@@ -102,3 +102,35 @@ class ConfigWatcher:
     def stop(self):
         self._observer.stop()
         self._observer.join(timeout=2)
+
+
+def save_config(config: Config, path: str) -> None:
+    """Serialize a Config back to profiles.json."""
+    data = {
+        "settings": {
+            "hud_toggle_hotkey": config.settings.hud_toggle_hotkey,
+            "hud_mode": config.settings.hud_mode,
+            "hud_flash_seconds": config.settings.hud_flash_seconds,
+            "theme": config.settings.theme,
+        },
+        "controls": dict(config.controls),
+        "profiles": [
+            {
+                "name": p.name, "color": p.color,
+                "match": {"process": list(p.match.process),
+                          **({"title": p.match.title} if p.match.title else {})},
+                "keys": {
+                    cid: {"label": b.label,
+                          "action": {k: v for k, v in {
+                              "type": b.action.type, "keys": b.action.keys,
+                              "target": b.action.target, "text": b.action.text,
+                          }.items() if v is not None}}
+                    for cid, b in p.keys.items()
+                },
+            }
+            for p in config.profiles
+        ],
+    }
+    with open(path, "w", encoding="utf-8") as f:
+        import json
+        json.dump(data, f, indent=2)
