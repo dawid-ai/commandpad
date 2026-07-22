@@ -26,7 +26,6 @@ class FakeEffects:
         self.calls = []
     def send_keys(self, keys): self.calls.append(("send_keys", keys))
     def open_target(self, t): self.calls.append(("open", t))
-    def launch(self, t): self.calls.append(("launch", t))
     def run_command(self, t): self.calls.append(("run", t))
     def type_text(self, t): self.calls.append(("text", t))
 
