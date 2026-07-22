@@ -73,3 +73,32 @@ def load_config(path: str) -> Config:
     with open(path, "r", encoding="utf-8") as f:
         data = json.load(f)
     return parse_config(data)
+
+
+# --- file watching (appended) ---
+from watchdog.observers import Observer
+from watchdog.events import FileSystemEventHandler
+import os as _os
+
+
+class _Handler(FileSystemEventHandler):
+    def __init__(self, path, on_change):
+        self._path = _os.path.abspath(path)
+        self._on_change = on_change
+    def on_modified(self, event):
+        if _os.path.abspath(event.src_path) == self._path:
+            self._on_change()
+
+
+class ConfigWatcher:
+    def __init__(self, path: str, on_change):
+        self._path = path
+        self._observer = Observer()
+        self._observer.schedule(_Handler(path, on_change),
+                                _os.path.dirname(_os.path.abspath(path)) or ".",
+                                recursive=False)
+    def start(self):
+        self._observer.start()
+    def stop(self):
+        self._observer.stop()
+        self._observer.join(timeout=2)

@@ -1,0 +1,33 @@
+{
+  "settings": {
+    "hud_toggle_hotkey": "ctrl+alt+shift+h",
+    "hud_mode": "flash",
+    "hud_flash_seconds": 2,
+    "theme": "dark"
+  },
+  "controls": {
+    "k1": "f13", "k2": "f14", "k3": "f15", "k4": "f16",
+    "k5": "f17", "k6": "f18", "k7": "f19", "k8": "f20",
+    "k9": "f21", "k10": "f22", "k11": "f23", "k12": "f24",
+    "knob1.ccw": "ctrl+alt+shift+f13", "knob1.cw": "ctrl+alt+shift+f14", "knob1.press": "ctrl+alt+shift+f15",
+    "knob2.ccw": "ctrl+alt+shift+f16", "knob2.cw": "ctrl+alt+shift+f17", "knob2.press": "ctrl+alt+shift+f18"
+  },
+  "profiles": [
+    {
+      "name": "Obsidian", "color": "#8b5cf6",
+      "match": { "process": ["Obsidian.exe"] },
+      "keys": {
+        "k1": { "label": "Search", "action": { "type": "send_keys", "keys": "ctrl+shift+f" } },
+        "knob1.cw": { "label": "Next tab", "action": { "type": "send_keys", "keys": "ctrl+tab" } }
+      }
+    },
+    {
+      "name": "Default", "color": "#2d2d2d",
+      "match": { "process": ["*"] },
+      "keys": {
+        "k1": { "label": "Copy", "action": { "type": "send_keys", "keys": "ctrl+c" } },
+        "k2": { "label": "Paste", "action": { "type": "send_keys", "keys": "ctrl+v" } }
+      }
+    }
+  ]
+}
