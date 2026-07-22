@@ -12,8 +12,12 @@ shortcuts.
 
 See `docs/specs/2026-07-22-commandpad-design.md` for the full design.
 
-## Run (once implemented)
+## Run
+
 ```
 pip install -r requirements.txt
+copy profiles.example.json profiles.json   # first time; then edit via the tray > Open Editor
 pythonw src/main.py
 ```
+
+Run at login: `python scripts/install_autostart.py`.
