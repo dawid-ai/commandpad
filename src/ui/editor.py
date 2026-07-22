@@ -80,11 +80,11 @@ class EditorWindow(QWidget):
             cap = QPushButton("⌨")
             cap.setFixedWidth(32)
             cap.setToolTip("Press a shortcut to capture it (for send_keys)")
-            cap.clicked.connect(lambda _=False, p=payload: self._capture_keys(p))
+            cap.clicked.connect(lambda _=False, p=payload, a=atype: self._capture_keys(p, a))
             browse = QPushButton("📁")
             browse.setFixedWidth(32)
             browse.setToolTip("Browse for a file to open (for open)")
-            browse.clicked.connect(lambda _=False, p=payload: self._browse_file(p))
+            browse.clicked.connect(lambda _=False, p=payload, a=atype: self._browse_file(p, a))
             self._grid.addWidget(label, i, 1)
             self._grid.addWidget(atype, i, 2)
             self._grid.addWidget(payload, i, 3)
@@ -140,7 +140,7 @@ class EditorWindow(QWidget):
         p.keys = keys
         self._list.item(idx).setText(p.name)
 
-    def _capture_keys(self, payload_field: QLineEdit):
+    def _capture_keys(self, payload_field: QLineEdit, atype_combo: QComboBox = None):
         dlg = QDialog(self)
         dlg.setWindowTitle("Capture shortcut")
         v = QVBoxLayout(dlg)
@@ -164,11 +164,15 @@ class EditorWindow(QWidget):
             sig = _seq_to_signal(kse.keySequence())
             if sig:
                 payload_field.setText(sig)
+                if atype_combo is not None:
+                    atype_combo.setCurrentText("send_keys")
 
-    def _browse_file(self, payload_field: QLineEdit):
+    def _browse_file(self, payload_field: QLineEdit, atype_combo: QComboBox = None):
         path, _ = QFileDialog.getOpenFileName(self, "Select a file or app to open")
         if path:
             payload_field.setText(os.path.normpath(path))
+            if atype_combo is not None:
+                atype_combo.setCurrentText("open")
 
     def _grab_app(self):
         proc, _ = self._detector.current()
