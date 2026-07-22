@@ -94,7 +94,7 @@ class EditorWindow(QWidget):
             label = QLineEdit()
             atype = QComboBox(); atype.addItems(_ACTION_TYPES)
             payload = QLineEdit()   # keys/target/text combined field
-            payload.setPlaceholderText("ctrl+c  ·  https://…  ·  a path  ·  text")
+            payload.setPlaceholderText("ctrl+c · volume_up · left · media_next · https://… · text")
             cap = QPushButton("⌨")
             cap.setFixedWidth(32)
             cap.setToolTip("Press a shortcut to capture it (for send_keys)")

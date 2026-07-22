@@ -87,6 +87,18 @@ class WindowsAppDetector:
         return (proc, title)
 
 
+# Friendly aliases -> pynput Key names (media / system keys are the non-obvious ones).
+_KEY_ALIASES = {
+    "volume_up": "media_volume_up", "vol_up": "media_volume_up", "volup": "media_volume_up",
+    "volume_down": "media_volume_down", "vol_down": "media_volume_down", "voldown": "media_volume_down",
+    "mute": "media_volume_mute", "volume_mute": "media_volume_mute",
+    "play_pause": "media_play_pause", "playpause": "media_play_pause", "play": "media_play_pause",
+    "next_track": "media_next", "next": "media_next",
+    "prev_track": "media_previous", "previous": "media_previous", "prev": "media_previous",
+    "pgup": "page_up", "pgdn": "page_down",
+}
+
+
 class WindowsEffects:
     """Satisfies the Effects protocol on Windows."""
 
@@ -96,6 +108,7 @@ class WindowsEffects:
     def send_keys(self, keys: str) -> None:
         parts = keys.lower().split("+")
         mods, main = parts[:-1], parts[-1]
+        main = _KEY_ALIASES.get(main, main)
         mod_keys = {"ctrl": keyboard.Key.ctrl, "alt": keyboard.Key.alt,
                     "shift": keyboard.Key.shift, "win": keyboard.Key.cmd}
         special = getattr(keyboard.Key, main, None)
