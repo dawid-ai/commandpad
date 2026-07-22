@@ -13,7 +13,7 @@
 - **Python 3.11**, standard library + the pinned deps only. No compiler / no build step.
 - **Pure-logic modules** (`models`, `config`, `dispatcher`, `tokens`, `actions`) MUST NOT import PySide6, pynput, pywin32, or any OS/UI library. They are unit-tested in isolation.
 - **OS-specific code** lives ONLY under `src/platform_impl/` behind the `platform_impl/base.py` interfaces. (Package named `platform_impl` to avoid shadowing the stdlib `platform` module.)
-- **Signal strings** are lowercase, `+`-joined, modifiers in fixed order `ctrl+alt+shift+win+<key>`, e.g. `f13`, `ctrl+alt+shift+f13`. Both `controls` values and the listener output use this exact format.
+- **Signal strings** are lowercase, `+`-joined, modifiers in fixed order `ctrl+alt+shift+win+<key>`, e.g. `f13`, `ctrl+f13`. Both `controls` values and the listener output use this exact format. (The pad's configurator only does single-modifier combos, so the real scheme is `f13`–`f24` for keys and `ctrl+f13`–`ctrl+f18` for the 6 knob actions.)
 - **Config file:** `profiles.json` (gitignored, personal); `profiles.example.json` is committed.
 - **Action types:** `send_keys`, `open`, `launch`, `run`, `text` — exact strings.
 - **HUD modes:** `flash`, `pinned`, `off` — exact strings.
@@ -1050,7 +1050,7 @@ class ConfigWatcher:
 ```json
 {
   "settings": {
-    "hud_toggle_hotkey": "ctrl+alt+shift+h",
+    "hud_toggle_hotkey": "ctrl+f15",
     "hud_mode": "flash",
     "hud_flash_seconds": 2,
     "theme": "dark"
@@ -1059,8 +1059,8 @@ class ConfigWatcher:
     "k1": "f13", "k2": "f14", "k3": "f15", "k4": "f16",
     "k5": "f17", "k6": "f18", "k7": "f19", "k8": "f20",
     "k9": "f21", "k10": "f22", "k11": "f23", "k12": "f24",
-    "knob1.ccw": "ctrl+alt+shift+f13", "knob1.cw": "ctrl+alt+shift+f14", "knob1.press": "ctrl+alt+shift+f15",
-    "knob2.ccw": "ctrl+alt+shift+f16", "knob2.cw": "ctrl+alt+shift+f17", "knob2.press": "ctrl+alt+shift+f18"
+    "knob1.ccw": "ctrl+f13", "knob1.cw": "ctrl+f14", "knob1.press": "ctrl+f15",
+    "knob2.ccw": "ctrl+f16", "knob2.cw": "ctrl+f17", "knob2.press": "ctrl+f18"
   },
   "profiles": [
     {
@@ -1068,7 +1068,7 @@ class ConfigWatcher:
       "match": { "process": ["Obsidian.exe"] },
       "keys": {
         "k1": { "label": "Search", "action": { "type": "send_keys", "keys": "ctrl+shift+f" } },
-        "knob1.cw": { "label": "Next tab", "action": { "type": "send_keys", "keys": "ctrl+tab" } }
+        "knob2.cw": { "label": "Next tab", "action": { "type": "send_keys", "keys": "ctrl+tab" } }
       }
     },
     {

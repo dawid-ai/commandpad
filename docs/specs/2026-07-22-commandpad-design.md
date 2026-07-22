@@ -30,9 +30,15 @@ Closed **VSDINSIDE** 12-key + 2-knob pad, USB VID `0x1189` (WCH CH55x-class),
 configured via `sdcx-tech.com` (proprietary WebHID; config persists on-device). NOT QMK —
 cannot be reflashed. App-aware logic therefore **must** live on the PC.
 
-The pad is configured (once, via the vendor tool) to emit **collision-proof signals**:
+The pad is configured (once, via the vendor tool) to emit **collision-proof signals**.
+The `sdcx-tech.com` configurator only supports simple single-modifier combos, so the scheme
+matches the earlier AutoHotkey setup:
 - 12 keys → `F13`–`F24`
-- 2 knobs × 3 actions (ccw / cw / press) → `Ctrl+Alt+Shift+F13`..`F18` ("Hyper" combos)
+- 2 knobs × 3 actions (ccw / cw / press) → `Ctrl+F13`..`Ctrl+F18`
+
+Nothing else on the system uses `F13`–`F24` or `Ctrl+F13`–`Ctrl+F18`, so they stay
+collision-proof. The HUD is toggled by **knob-1 click** (`Ctrl+F15`), mirroring the AHK
+overlay — see §6.
 
 Nothing else on the system uses these, so the app **only listens** — it does not intercept
 or suppress keystrokes. This removes the hardest, flakiest part of a Windows key hook.
@@ -92,7 +98,7 @@ Runtime data, hot-reloaded. Three parts: `settings`, a one-time `controls` map, 
 ```jsonc
 {
   "settings": {
-    "hud_toggle_hotkey": "ctrl+alt+shift+h",
+    "hud_toggle_hotkey": "ctrl+f15",   // knob-1 click, like the AHK overlay
     "hud_mode": "flash",            // flash | pinned | off
     "hud_flash_seconds": 2,
     "theme": "dark"
@@ -101,8 +107,8 @@ Runtime data, hot-reloaded. Three parts: `settings`, a one-time `controls` map, 
     "k1": "f13", "k2": "f14", "k3": "f15", "k4": "f16",
     "k5": "f17", "k6": "f18", "k7": "f19", "k8": "f20",
     "k9": "f21", "k10": "f22", "k11": "f23", "k12": "f24",
-    "knob1.ccw": "ctrl+alt+shift+f13", "knob1.cw": "ctrl+alt+shift+f14", "knob1.press": "ctrl+alt+shift+f15",
-    "knob2.ccw": "ctrl+alt+shift+f16", "knob2.cw": "ctrl+alt+shift+f17", "knob2.press": "ctrl+alt+shift+f18"
+    "knob1.ccw": "ctrl+f13", "knob1.cw": "ctrl+f14", "knob1.press": "ctrl+f15",
+    "knob2.ccw": "ctrl+f16", "knob2.cw": "ctrl+f17", "knob2.press": "ctrl+f18"
   },
   "profiles": [
     {
@@ -146,7 +152,9 @@ Tokens (v1): `{today}` (yyyy-mm-dd). More can be added later.
 
 ## 6. HUD behavior
 
-- **Toggle** via `hud_toggle_hotkey` (default `Ctrl+Alt+Shift+H`, collision-proof).
+- **Toggle** via `hud_toggle_hotkey` (default `Ctrl+F15` = knob-1 click, mirroring the AHK
+  overlay). Any collision-proof signal the pad emits works; the toggle signal is consumed
+  before dispatch, so it isn't also a per-app action.
 - **Modes:** `flash` (appears on app-switch, fades after `hud_flash_seconds`), `pinned`
   (stays until toggled off), `off` (only shows on the hotkey).
 - **Look:** translucent rounded panel laid out as the 4×3 grid + 2 knobs; each cell shows
