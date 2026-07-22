@@ -1,8 +1,9 @@
 # src/ui/editor.py
+import os
 from PySide6.QtWidgets import (
     QWidget, QListWidget, QHBoxLayout, QVBoxLayout, QFormLayout, QLineEdit,
     QComboBox, QPushButton, QLabel, QScrollArea, QGridLayout, QDialog,
-    QKeySequenceEdit
+    QKeySequenceEdit, QFileDialog
 )
 from PySide6.QtGui import QKeySequence
 from src.config import load_config, save_config
@@ -80,10 +81,15 @@ class EditorWindow(QWidget):
             cap.setFixedWidth(32)
             cap.setToolTip("Press a shortcut to capture it (for send_keys)")
             cap.clicked.connect(lambda _=False, p=payload: self._capture_keys(p))
+            browse = QPushButton("📁")
+            browse.setFixedWidth(32)
+            browse.setToolTip("Browse for a file to open (for open)")
+            browse.clicked.connect(lambda _=False, p=payload: self._browse_file(p))
             self._grid.addWidget(label, i, 1)
             self._grid.addWidget(atype, i, 2)
             self._grid.addWidget(payload, i, 3)
             self._grid.addWidget(cap, i, 4)
+            self._grid.addWidget(browse, i, 5)
             self._rows[cid] = (label, atype, payload)
         scroll.setWidget(grid_host)
         right.addWidget(scroll, 1)
@@ -158,6 +164,11 @@ class EditorWindow(QWidget):
             sig = _seq_to_signal(kse.keySequence())
             if sig:
                 payload_field.setText(sig)
+
+    def _browse_file(self, payload_field: QLineEdit):
+        path, _ = QFileDialog.getOpenFileName(self, "Select a file or app to open")
+        if path:
+            payload_field.setText(os.path.normpath(path))
 
     def _grab_app(self):
         proc, _ = self._detector.current()
